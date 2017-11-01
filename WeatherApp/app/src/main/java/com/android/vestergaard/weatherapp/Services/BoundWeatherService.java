@@ -39,13 +39,14 @@ public class BoundWeatherService extends Service {
                 @Override
                 public void onResponse(Call<CityWeatherData> call, Response<CityWeatherData> response) {
                     Log.d("Weather", "Weather Data Received!");
-                    Log.d("Weather", "City Name: " + response.body().name);
-                    Log.d("Weather", "Temperature: " + response.body().main.temp);
+                    Log.d("Weather", "City Name: " + response.body().CityName);
+                    Log.d("Weather", "Temperature: " + response.body().WeatherData.Temperature);
                 }
 
                 @Override
                 public void onFailure(Call<CityWeatherData> call, Throwable t) {
                     Log.d("Weather", "Failed to get weather data");
+                    Log.d("Weather", t.getMessage());
                 }
             });
         } catch (Exception e)

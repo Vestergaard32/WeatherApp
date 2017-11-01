@@ -8,17 +8,69 @@ import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.ListView;
 
+import com.android.vestergaard.weatherapp.Models.CityWeatherAdapter;
+import com.android.vestergaard.weatherapp.Models.CityWeatherData;
+import com.android.vestergaard.weatherapp.Models.WeatherData;
+import com.android.vestergaard.weatherapp.Repositories.SharedPreferenceRepository;
 import com.android.vestergaard.weatherapp.Services.BoundWeatherService;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
     public boolean mBound;
     public BoundWeatherService mService;
 
+    /*
+        Java has HashMap as a dictionary, implemented by the Map interface
+     */
+    private Map<String, CityWeatherData> cityWeatherData;
+    private CityWeatherAdapter cityWeatherAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        CityWeatherData cityWeatherData1 = new CityWeatherData();
+        cityWeatherData1.WeatherData = new WeatherData();
+
+        cityWeatherData1.CityName = "Aarhus";
+        cityWeatherData1.WeatherData.Temperature = 25.28;
+        cityWeatherData1.WeatherData.Humidity = 13;
+
+        CityWeatherData cityWeatherData2 = new CityWeatherData();
+        cityWeatherData2.WeatherData = new WeatherData();
+
+        cityWeatherData2.CityName = "Copenhagen";
+        cityWeatherData2.WeatherData.Temperature = 35.25;
+        cityWeatherData2.WeatherData.Humidity = 22;
+
+        cityWeatherData = new HashMap<String, CityWeatherData>();
+        cityWeatherData.put("key1", cityWeatherData1);
+        cityWeatherData.put("key2", cityWeatherData2);
+
+
+        Collection<CityWeatherData> cityWeatherDataSet = cityWeatherData.values();
+        ArrayList<CityWeatherData> theCities = new ArrayList<CityWeatherData>(cityWeatherDataSet);
+
+        cityWeatherAdapter = new CityWeatherAdapter(this, R.layout.city_weather_list_item,
+                theCities);
+
+        ListView cityWeatherDataListView = (ListView) findViewById(R.id.cityWeatherDataList);
+        cityWeatherDataListView.setAdapter(cityWeatherAdapter);
+
+        SharedPreferenceRepository rep = new SharedPreferenceRepository(this);
+        rep.SaveCityWeatherData(cityWeatherData1);
+
+        CityWeatherData brandNewCityWeatherData = rep.GetCityWeatherData(cityWeatherData1.CityName);
+
+        Log.d("Weather", "SAVED WEATHER CITY: " + brandNewCityWeatherData.CityName);
+
     }
 
     @Override
