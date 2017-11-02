@@ -18,6 +18,7 @@
             </intent-filter>
         </activity>s
         <service android:name=".Services.BoundWeatherService"></service>
+        <service android:name=".Services.IntentWeatherService" />
     </application>
 
 </manifest>
