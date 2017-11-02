@@ -70,7 +70,6 @@ public class MainActivity extends AppCompatActivity {
         CityWeatherData brandNewCityWeatherData = rep.GetCityWeatherData(cityWeatherData1.CityName);
 
         Log.d("Weather", "SAVED WEATHER CITY: " + brandNewCityWeatherData.CityName);
-
     }
 
     @Override
