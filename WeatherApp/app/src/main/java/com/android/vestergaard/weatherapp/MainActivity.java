@@ -8,6 +8,8 @@ import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.android.vestergaard.weatherapp.Models.CityWeatherAdapter;
@@ -15,6 +17,7 @@ import com.android.vestergaard.weatherapp.Models.CityWeatherData;
 import com.android.vestergaard.weatherapp.Models.WeatherData;
 import com.android.vestergaard.weatherapp.Repositories.SharedPreferenceRepository;
 import com.android.vestergaard.weatherapp.Services.BoundWeatherService;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -70,6 +73,19 @@ public class MainActivity extends AppCompatActivity {
         CityWeatherData brandNewCityWeatherData = rep.GetCityWeatherData(cityWeatherData1.CityName);
 
         Log.d("Weather", "SAVED WEATHER CITY: " + brandNewCityWeatherData.CityName);
+
+        cityWeatherDataListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Intent cityWeatherDetailsIntent = new Intent(MainActivity.this, CityWeatherDetailsActivity.class);
+                CityWeatherData selectedCityWeatherData = (CityWeatherData)adapterView.getItemAtPosition(i);
+
+                Gson gson = new Gson();
+                cityWeatherDetailsIntent.putExtra("cityWeather", gson.toJson(selectedCityWeatherData));
+
+                startActivity(cityWeatherDetailsIntent);
+            }
+        });
     }
 
     @Override
