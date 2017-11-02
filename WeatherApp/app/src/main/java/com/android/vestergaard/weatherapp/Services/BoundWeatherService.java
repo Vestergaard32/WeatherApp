@@ -4,6 +4,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -13,7 +14,8 @@ import com.android.vestergaard.weatherapp.Models.CityWeatherData;
 import com.android.vestergaard.weatherapp.Repositories.SharedPreferenceRepository;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import retrofit2.Call;
 import retrofit2.Retrofit;
@@ -21,9 +23,11 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class BoundWeatherService extends Service {
     private final IBinder binder = new WeatherServiceBinder();
-    private final String DATA_READY_NOTIFICATION = "Weather.Data.Ready";
+    private final String DATA_READY_BROADCAST = "Weather.Data.Ready";
     private OpenWeatherApiService weatherApiService;
     private SharedPreferenceRepository repository;
+    private final Handler handler = new Handler();;
+    private Timer Timer;
 
     /* Methods For The Components */
     public void getCurrentWeather(final String city){
@@ -31,7 +35,9 @@ public class BoundWeatherService extends Service {
         Call<CityWeatherData> bla = weatherApiService.getCityWeatherData(city);
         try
         {
-            repository.SaveCityWeatherData(city, bla.execute().body());
+            CityWeatherData data = bla.execute().body();
+            data.CityName = city;
+            repository.SaveCityWeatherData(city, data);
         } catch (Exception e)
         {
             Log.d("Weather", "Exception: " + e.toString());
@@ -39,7 +45,7 @@ public class BoundWeatherService extends Service {
         }
     }
 
-    public List<CityWeatherData> getAllCitiesWeather(){
+    public ArrayList<CityWeatherData> getAllCitiesWeather(){
         Cities cities = repository.GetCities();
         ArrayList<CityWeatherData> data = new ArrayList<>();
         for (String city:cities.Cities) {
@@ -56,6 +62,7 @@ public class BoundWeatherService extends Service {
 
     public void RemoveCity(String cityName){
         repository.RemoveCity(cityName);
+        ForceRefresh();
     }
 
     public void ForceRefresh(){
@@ -65,14 +72,13 @@ public class BoundWeatherService extends Service {
                 Cities cities = repository.GetCities();
                 for (String city:cities.Cities) {
                     getCurrentWeather(city);
-                    Log.d("TaskStuff", city + " has been refreshed");
                 }
                 return "";
             }
 
             @Override
             protected void onPostExecute(String s) {
-                Intent broadcastIntent = new Intent(DATA_READY_NOTIFICATION);
+                Intent broadcastIntent = new Intent(DATA_READY_BROADCAST);
                 LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(broadcastIntent);
             }
         };
@@ -80,8 +86,7 @@ public class BoundWeatherService extends Service {
     }
 
     /* Binder Method */
-    public class WeatherServiceBinder extends Binder
-    {
+    public class WeatherServiceBinder extends Binder {
         public BoundWeatherService getService(){
             return BoundWeatherService.this;
         }
@@ -101,13 +106,37 @@ public class BoundWeatherService extends Service {
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
+        Timer = new Timer();
         weatherApiService = retrofit.create(OpenWeatherApiService.class);
         repository = new SharedPreferenceRepository(getApplicationContext());
     }
 
     @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        /* Heavily influence by https://stackoverflow.com/questions/6531950/how-to-execute-async-task-repeatedly-after-fixed-time-intervals*/
+        TimerTask doAsynchronousTask = new TimerTask() {
+            @Override
+            public void run() {
+                handler.post(new Runnable() {
+                    public void run() {
+                        try {
+                            ForceRefresh();
+                        } catch (Exception e) {
+                            Log.d("Weather", "Timed refresh threw an exception: " + e);
+                        }
+                    }
+                });
+            }
+        };
+        Timer.schedule(doAsynchronousTask, 0, 5*60*1000); // Every 5 minutes
+        return START_STICKY;
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
+        Timer.cancel();
+        Timer.purge();
     }
 
     @Override

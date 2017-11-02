@@ -1,16 +1,20 @@
 package com.android.vestergaard.weatherapp;
 
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 
 import com.android.vestergaard.weatherapp.Models.CityWeatherAdapter;
@@ -28,12 +32,11 @@ import java.util.Map;
 public class MainActivity extends AppCompatActivity {
     public boolean mBound;
     public BoundWeatherService mService;
-
-    /*
-        Java has HashMap as a dictionary, implemented by the Map interface
-     */
-    private Map<String, CityWeatherData> cityWeatherData;
+    private final String DATA_READY_NOTIFICATION = "Weather.Data.Ready";
+    private final String WEATHER_DATA_INTENT_KEY = "cityWeather";
     private CityWeatherAdapter cityWeatherAdapter;
+    ArrayList<CityWeatherData> theCities = new ArrayList();
+
 
     private final int CITY_WEATHER_DETAILS_REQUEST_CODE = 0;
 
@@ -41,43 +44,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        CityWeatherData cityWeatherData1 = new CityWeatherData();
-        cityWeatherData1.WeatherData = new WeatherData();
-
-        cityWeatherData1.CityName = "Aarhus";
-        cityWeatherData1.WeatherData.Temperature = 25.28;
-        cityWeatherData1.WeatherData.Humidity = 13;
-
-        CityWeatherData cityWeatherData2 = new CityWeatherData();
-        cityWeatherData2.WeatherData = new WeatherData();
-
-        cityWeatherData2.CityName = "Copenhagen";
-        cityWeatherData2.WeatherData.Temperature = 35.25;
-        cityWeatherData2.WeatherData.Humidity = 22;
-
-        cityWeatherData = new HashMap<String, CityWeatherData>();
-        cityWeatherData.put("key1", cityWeatherData1);
-        cityWeatherData.put("key2", cityWeatherData2);
-
-
-        Collection<CityWeatherData> cityWeatherDataSet = cityWeatherData.values();
-        ArrayList<CityWeatherData> theCities = new ArrayList<CityWeatherData>(cityWeatherDataSet);
-
-        cityWeatherAdapter = new CityWeatherAdapter(this, R.layout.city_weather_list_item,
-                theCities);
-
-        ListView cityWeatherDataListView = (ListView) findViewById(R.id.cityWeatherDataList);
-        cityWeatherDataListView.setAdapter(cityWeatherAdapter);
-
-        SharedPreferenceRepository rep = new SharedPreferenceRepository(this);
-        rep.SaveCityWeatherData(cityWeatherData1);
-
-        CityWeatherData brandNewCityWeatherData = rep.GetCityWeatherData(cityWeatherData1.CityName);
-
-        Log.d("Weather", "SAVED WEATHER CITY: " + brandNewCityWeatherData.CityName);
+        Log.d("Weather", "Binding BoundWeatherService...");
+        Intent bindIntent = new Intent(this, BoundWeatherService.class);
+        startService(bindIntent);
+        bindService(bindIntent, mConnection, Context.BIND_AUTO_CREATE);
 
         SetupEventListeners();
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(dataReceiver, new IntentFilter(DATA_READY_NOTIFICATION));
     }
 
     private void SetupEventListeners()
@@ -90,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
                 CityWeatherData selectedCityWeatherData = (CityWeatherData)adapterView.getItemAtPosition(i);
 
                 Gson gson = new Gson();
-                cityWeatherDetailsIntent.putExtra("cityWeather", gson.toJson(selectedCityWeatherData));
+                cityWeatherDetailsIntent.putExtra(WEATHER_DATA_INTENT_KEY, gson.toJson(selectedCityWeatherData));
 
                 startActivityForResult(cityWeatherDetailsIntent, CITY_WEATHER_DETAILS_REQUEST_CODE);
             }
@@ -101,9 +75,35 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Log.d("Weather", "Refreshing weather data!");
+                if(mBound){
+                    mService.ForceRefresh();
+                }
+            }
+        });
+
+        Button btnAdd = (Button) findViewById(R.id.btnAddCity);
+        final EditText txtCityName = (EditText) findViewById(R.id.cityNameInput);
+        btnAdd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(mBound){
+                    mService.AddCity(txtCityName.getText().toString());
+                }
             }
         });
     }
+
+    private BroadcastReceiver dataReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            theCities = mService.getAllCitiesWeather();
+            cityWeatherAdapter = new CityWeatherAdapter(getApplicationContext(), R.layout.city_weather_list_item,
+                    theCities);
+
+            ListView cityWeatherDataListView = (ListView) findViewById(R.id.cityWeatherDataList);
+            cityWeatherDataListView.setAdapter(cityWeatherAdapter);
+        }
+    };
 
     @Override
     protected  void onActivityResult(int requestCode, int resultCode, Intent data)
@@ -112,7 +112,12 @@ public class MainActivity extends AppCompatActivity {
         {
             if (resultCode == CityWeatherDetailsActivity.REMOVE_RESULT_CODE)
             {
-                Log.d("Weather", "User wanted to remove city");
+                Gson gson = new Gson();
+                CityWeatherData cityData = gson.fromJson(data.getStringExtra(WEATHER_DATA_INTENT_KEY), CityWeatherData.class);
+                Log.d("Weather", "User wanted to remove city " + cityData.CityName);
+                if(mBound){
+                    mService.RemoveCity(cityData.CityName);
+                }
             }
         }
     }
@@ -120,21 +125,22 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-
-        Log.d("Weather", "Binding BoundWeatherService...");
-        Intent bindIntent = new Intent(this, BoundWeatherService.class);
-        bindService(bindIntent, mConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+    }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
         if (mBound) {
             Log.d("Weather", "Unbinding service...");
             unbindService(mConnection);
             mBound = false;
         }
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(dataReceiver);
     }
 
     /** Defines callbacks for service binding, passed to bindService() */
@@ -147,8 +153,12 @@ public class MainActivity extends AppCompatActivity {
             BoundWeatherService.WeatherServiceBinder binder = (BoundWeatherService.WeatherServiceBinder) service;
             mService = binder.getService();
             mBound = true;
+            theCities = mService.getAllCitiesWeather();
+            cityWeatherAdapter = new CityWeatherAdapter(getApplicationContext(), R.layout.city_weather_list_item,
+                    theCities);
 
-            mService.getCurrentWeather("Aarhus");
+            ListView cityWeatherDataListView = (ListView) findViewById(R.id.cityWeatherDataList);
+            cityWeatherDataListView.setAdapter(cityWeatherAdapter);
         }
 
         @Override

@@ -78,7 +78,12 @@ public class SharedPreferenceRepository {
 
         String json = sharedPref.getString(CITIES_KEY, "");
 
-        return gson.fromJson(json, Cities.class);
+        Cities cities = gson.fromJson(json, Cities.class);
+        if(cities == null){
+            cities = new Cities();
+            cities.Cities = new ArrayList<>();
+        }
+        return cities;
     }
 
     public void RemoveCity(String city)

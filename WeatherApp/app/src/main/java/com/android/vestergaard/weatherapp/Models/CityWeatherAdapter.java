@@ -16,9 +16,6 @@ import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 
-/**
- * Created by CodingBeagle on 01-11-2017.
- */
 public class CityWeatherAdapter extends ArrayAdapter<CityWeatherData> {
     public CityWeatherAdapter(@NonNull Context context, @LayoutRes int resource, @NonNull ArrayList<CityWeatherData> objects) {
         super(context, resource, objects);
@@ -30,7 +27,6 @@ public class CityWeatherAdapter extends ArrayAdapter<CityWeatherData> {
         // Check if an existing view is being reused, otherwise inflate view
         if (convertView == null)
         {
-            Log.d("Weather", "ConvertView was null!");
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.city_weather_list_item,
                     parent,
                     false);
