@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ListView;
 
 import com.android.vestergaard.weatherapp.Models.CityWeatherAdapter;
@@ -76,6 +77,12 @@ public class MainActivity extends AppCompatActivity {
 
         Log.d("Weather", "SAVED WEATHER CITY: " + brandNewCityWeatherData.CityName);
 
+        SetupEventListeners();
+    }
+
+    private void SetupEventListeners()
+    {
+        ListView cityWeatherDataListView = (ListView) findViewById(R.id.cityWeatherDataList);
         cityWeatherDataListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -86,6 +93,14 @@ public class MainActivity extends AppCompatActivity {
                 cityWeatherDetailsIntent.putExtra("cityWeather", gson.toJson(selectedCityWeatherData));
 
                 startActivityForResult(cityWeatherDetailsIntent, CITY_WEATHER_DETAILS_REQUEST_CODE);
+            }
+        });
+
+        Button btnRefresh = (Button)findViewById(R.id.btnRefresh);
+        btnRefresh.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d("Weather", "Refreshing weather data!");
             }
         });
     }
