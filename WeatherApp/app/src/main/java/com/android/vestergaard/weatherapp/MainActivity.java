@@ -88,6 +88,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 if(mBound){
                     mService.AddCity(txtCityName.getText().toString());
+                    txtCityName.setText("");
                 }
             }
         });

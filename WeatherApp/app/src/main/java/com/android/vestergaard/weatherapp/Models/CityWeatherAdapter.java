@@ -41,7 +41,7 @@ public class CityWeatherAdapter extends ArrayAdapter<CityWeatherData> {
         TextView cityHumidity = (TextView) convertView.findViewById(R.id.CityHumidity);
 
         // Populate data
-        cityName.setText(cityWeatherData.CityName);
+        cityName.setText(cityWeatherData.CityName+ ", " + cityWeatherData.metaWeatherData.Country);
         cityTemperature.setText(Double.toString(cityWeatherData.WeatherData.Temperature) + "°C");
         cityHumidity.setText(Integer.toString(cityWeatherData.WeatherData.Humidity) + "%");
 

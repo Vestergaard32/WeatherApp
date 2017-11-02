@@ -18,6 +18,9 @@ public class CityWeatherData {
     @SerializedName("main")
     public WeatherData WeatherData;
 
+    @SerializedName("sys")
+    public MetaWeatherData metaWeatherData;
+
     @SerializedName("weather")
     public ArrayList<WeatherDescription> WeatherDescription;
 }
