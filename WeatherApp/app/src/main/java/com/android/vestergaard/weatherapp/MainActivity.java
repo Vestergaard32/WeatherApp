@@ -8,6 +8,9 @@ import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ListView;
 
 import com.android.vestergaard.weatherapp.Models.CityWeatherAdapter;
@@ -15,6 +18,7 @@ import com.android.vestergaard.weatherapp.Models.CityWeatherData;
 import com.android.vestergaard.weatherapp.Models.WeatherData;
 import com.android.vestergaard.weatherapp.Repositories.SharedPreferenceRepository;
 import com.android.vestergaard.weatherapp.Services.BoundWeatherService;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,6 +34,8 @@ public class MainActivity extends AppCompatActivity {
      */
     private Map<String, CityWeatherData> cityWeatherData;
     private CityWeatherAdapter cityWeatherAdapter;
+
+    private final int CITY_WEATHER_DETAILS_REQUEST_CODE = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +77,44 @@ public class MainActivity extends AppCompatActivity {
 
         Log.d("Weather", "SAVED WEATHER CITY: " + brandNewCityWeatherData.CityName);
 
+        SetupEventListeners();
+    }
+
+    private void SetupEventListeners()
+    {
+        ListView cityWeatherDataListView = (ListView) findViewById(R.id.cityWeatherDataList);
+        cityWeatherDataListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Intent cityWeatherDetailsIntent = new Intent(MainActivity.this, CityWeatherDetailsActivity.class);
+                CityWeatherData selectedCityWeatherData = (CityWeatherData)adapterView.getItemAtPosition(i);
+
+                Gson gson = new Gson();
+                cityWeatherDetailsIntent.putExtra("cityWeather", gson.toJson(selectedCityWeatherData));
+
+                startActivityForResult(cityWeatherDetailsIntent, CITY_WEATHER_DETAILS_REQUEST_CODE);
+            }
+        });
+
+        Button btnRefresh = (Button)findViewById(R.id.btnRefresh);
+        btnRefresh.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d("Weather", "Refreshing weather data!");
+            }
+        });
+    }
+
+    @Override
+    protected  void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        if (requestCode == CITY_WEATHER_DETAILS_REQUEST_CODE)
+        {
+            if (resultCode == CityWeatherDetailsActivity.REMOVE_RESULT_CODE)
+            {
+                Log.d("Weather", "User wanted to remove city");
+            }
+        }
     }
 
     @Override
