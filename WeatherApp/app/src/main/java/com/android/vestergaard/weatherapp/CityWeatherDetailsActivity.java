@@ -12,6 +12,8 @@ import com.android.vestergaard.weatherapp.Models.WeatherDescription;
 import com.google.gson.Gson;
 
 public class CityWeatherDetailsActivity extends AppCompatActivity {
+    public static final int OK_RESULT_CODE = 100;
+    public static final int REMOVE_RESULT_CODE = 101;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +37,16 @@ public class CityWeatherDetailsActivity extends AppCompatActivity {
         btnOk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                setResult(OK_RESULT_CODE);
+                finish();
+            }
+        });
+
+        Button btnRemove = (Button)findViewById(R.id.btnRemove);
+        btnRemove.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setResult(REMOVE_RESULT_CODE);
                 finish();
             }
         });

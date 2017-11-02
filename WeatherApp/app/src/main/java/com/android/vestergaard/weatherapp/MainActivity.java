@@ -34,6 +34,8 @@ public class MainActivity extends AppCompatActivity {
     private Map<String, CityWeatherData> cityWeatherData;
     private CityWeatherAdapter cityWeatherAdapter;
 
+    private final int CITY_WEATHER_DETAILS_REQUEST_CODE = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -83,9 +85,21 @@ public class MainActivity extends AppCompatActivity {
                 Gson gson = new Gson();
                 cityWeatherDetailsIntent.putExtra("cityWeather", gson.toJson(selectedCityWeatherData));
 
-                startActivity(cityWeatherDetailsIntent);
+                startActivityForResult(cityWeatherDetailsIntent, CITY_WEATHER_DETAILS_REQUEST_CODE);
             }
         });
+    }
+
+    @Override
+    protected  void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        if (requestCode == CITY_WEATHER_DETAILS_REQUEST_CODE)
+        {
+            if (resultCode == CityWeatherDetailsActivity.REMOVE_RESULT_CODE)
+            {
+                Log.d("Weather", "User wanted to remove city");
+            }
+        }
     }
 
     @Override
