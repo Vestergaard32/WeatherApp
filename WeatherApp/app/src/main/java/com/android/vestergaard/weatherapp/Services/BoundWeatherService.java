@@ -35,6 +35,7 @@ public class BoundWeatherService extends Service {
     private SharedPreferenceRepository repository;
     private final Handler handler = new Handler();;
     private Timer Timer;
+    private boolean isStarted = false;
 
     /* Methods For The Components */
     public void getCurrentWeather(final String city){
@@ -134,22 +135,25 @@ public class BoundWeatherService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        if(!isStarted){
         /* Heavily influence by https://stackoverflow.com/questions/6531950/how-to-execute-async-task-repeatedly-after-fixed-time-intervals*/
-        TimerTask doAsynchronousTask = new TimerTask() {
-            @Override
-            public void run() {
-                handler.post(new Runnable() {
-                    public void run() {
-                        try {
-                            ForceRefresh();
-                        } catch (Exception e) {
-                            Log.d("Weather", "Timed refresh threw an exception: " + e);
+            TimerTask doAsynchronousTask = new TimerTask() {
+                @Override
+                public void run() {
+                    handler.post(new Runnable() {
+                        public void run() {
+                            try {
+                                ForceRefresh();
+                            } catch (Exception e) {
+                                Log.d("Weather", "Timed refresh threw an exception: " + e);
+                            }
                         }
-                    }
-                });
-            }
-        };
-        Timer.schedule(doAsynchronousTask, 0, 5*60*1000); // Every 5 minutes
+                    });
+                }
+            };
+            Timer.schedule(doAsynchronousTask, 0, 5*60*1000); // Every 5 minutes
+        }
+
         return START_STICKY;
     }
 
