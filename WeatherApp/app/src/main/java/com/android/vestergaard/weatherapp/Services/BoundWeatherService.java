@@ -2,6 +2,8 @@ package com.android.vestergaard.weatherapp.Services;
 
 import android.app.Service;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Handler;
@@ -13,6 +15,9 @@ import com.android.vestergaard.weatherapp.Models.Cities;
 import com.android.vestergaard.weatherapp.Models.CityWeatherData;
 import com.android.vestergaard.weatherapp.Repositories.SharedPreferenceRepository;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -37,6 +42,17 @@ public class BoundWeatherService extends Service {
         {
             CityWeatherData data = bla.execute().body();
             data.CityName = city;
+            try {
+                if(data.WeatherDescription.get(0).Icon != null){
+                    String icon = data.WeatherDescription.get(0).Icon;
+                    String imageUrl = "http://openweathermap.org/img/w/" + icon + ".png";
+                    Bitmap bitmap = BitmapFactory.decodeStream((InputStream)new URL(imageUrl).getContent());
+                    data.WeatherIcon = bitmap;
+                }
+            } catch (IOException e) {
+                Log.d("Weather", "IOException from getting ICON");
+                e.printStackTrace();
+            }
             repository.SaveCityWeatherData(city, data);
         } catch (Exception e)
         {

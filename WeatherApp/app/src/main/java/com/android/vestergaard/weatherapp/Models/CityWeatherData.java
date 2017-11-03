@@ -1,5 +1,7 @@
 package com.android.vestergaard.weatherapp.Models;
 
+import android.graphics.Bitmap;
+
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
@@ -23,5 +25,7 @@ public class CityWeatherData {
 
     @SerializedName("weather")
     public ArrayList<WeatherDescription> WeatherDescription;
+
+    public Bitmap WeatherIcon;
 }
 
