@@ -1,11 +1,15 @@
 package com.android.vestergaard.weatherapp;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.vestergaard.weatherapp.Models.CityWeatherData;
@@ -66,6 +70,20 @@ public class CityWeatherDetailsActivity extends AppCompatActivity {
         cityWeatherTemperature.setText(cityWeatherData.WeatherData.Temperature + "°C");
 
         TextView cityWeatherDescription = (TextView)findViewById(R.id.CityWeatherDescription);
+
+        ImageView imageView = (ImageView)findViewById(R.id.imgViewWeatherIcon);
+        String encodedBitmap = cityWeatherData.EncodedWeatherIcon;
+        if(encodedBitmap != null){
+            try{
+                byte[] decodedbytes = Base64.decode(encodedBitmap, Base64.DEFAULT);
+                Bitmap bitMap = BitmapFactory.decodeByteArray(decodedbytes, 0, decodedbytes.length);
+                imageView.setImageBitmap(bitMap);
+            }
+            catch (Exception e){
+                Log.d("Weather", "Image error");
+                Log.d("Weather", e.getMessage());
+            }
+        }
 
         if (cityWeatherData.WeatherDescription != null)
         {

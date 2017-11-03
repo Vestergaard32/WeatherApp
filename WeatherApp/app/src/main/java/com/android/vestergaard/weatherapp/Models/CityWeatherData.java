@@ -26,6 +26,6 @@ public class CityWeatherData {
     @SerializedName("weather")
     public ArrayList<WeatherDescription> WeatherDescription;
 
-    public Bitmap WeatherIcon;
+    public String EncodedWeatherIcon;
 }
 

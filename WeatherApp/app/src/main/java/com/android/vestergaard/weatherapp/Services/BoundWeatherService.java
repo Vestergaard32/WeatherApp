@@ -9,12 +9,14 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Base64;
 import android.util.Log;
 
 import com.android.vestergaard.weatherapp.Models.Cities;
 import com.android.vestergaard.weatherapp.Models.CityWeatherData;
 import com.android.vestergaard.weatherapp.Repositories.SharedPreferenceRepository;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -47,7 +49,10 @@ public class BoundWeatherService extends Service {
                     String icon = data.WeatherDescription.get(0).Icon;
                     String imageUrl = "http://openweathermap.org/img/w/" + icon + ".png";
                     Bitmap bitmap = BitmapFactory.decodeStream((InputStream)new URL(imageUrl).getContent());
-                    data.WeatherIcon = bitmap;
+                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+                    byte[] byteArray = byteArrayOutputStream .toByteArray();
+                    data.EncodedWeatherIcon = Base64.encodeToString(byteArray, Base64.DEFAULT);
                 }
             } catch (IOException e) {
                 Log.d("Weather", "IOException from getting ICON");

@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -71,8 +72,19 @@ public class CityWeatherAdapter extends ArrayAdapter<CityWeatherData> {
             holder.cityName.setText(cityWeatherData.CityName+ ", " + cityWeatherData.metaWeatherData.Country);
             holder.cityTemperature.setText(Double.toString(cityWeatherData.WeatherData.Temperature) + "°C");
             holder.cityHumidity.setText(Integer.toString(cityWeatherData.WeatherData.Humidity) + "%");
-            if(cityWeatherData.WeatherIcon != null && holder.imageView != null){
-                //holder.imageView.setImageBitmap(cityWeatherData.WeatherIcon);
+            if(cityWeatherData.EncodedWeatherIcon != null && holder.imageView != null){
+                String encodedBitmap = cityWeatherData.EncodedWeatherIcon;
+                if(encodedBitmap != null){
+                    try{
+                        byte[] decodedbytes = Base64.decode(encodedBitmap, Base64.DEFAULT);
+                        Bitmap bitMap = BitmapFactory.decodeByteArray(decodedbytes, 0, decodedbytes.length);
+                        holder.imageView.setImageBitmap(bitMap);
+                    }
+                    catch (Exception e){
+                        Log.d("Weather", "Image error");
+                        Log.d("Weather", e.getMessage());
+                    }
+                }
             }
         }
         return convertView;
