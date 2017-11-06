@@ -114,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
         btnAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(mBound){
+                if(mBound && !txtCityName.getText().toString().equals("")){
                     mService.AddCity(txtCityName.getText().toString());
                     txtCityName.setText("");
                 }
