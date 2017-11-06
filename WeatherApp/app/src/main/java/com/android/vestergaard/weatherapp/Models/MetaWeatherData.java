@@ -2,7 +2,7 @@ package com.android.vestergaard.weatherapp.Models;
 
 import com.google.gson.annotations.SerializedName;
 
-class MetaWeatherData {
+public class MetaWeatherData {
     @SerializedName("country")
     public String Country;
     @SerializedName("sunrise")

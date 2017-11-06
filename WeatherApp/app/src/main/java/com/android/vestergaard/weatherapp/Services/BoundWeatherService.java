@@ -1,32 +1,49 @@
 package com.android.vestergaard.weatherapp.Services;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Base64;
 import android.util.Log;
+import android.widget.Toast;
 
+import com.android.vestergaard.weatherapp.MainActivity;
 import com.android.vestergaard.weatherapp.Models.Cities;
 import com.android.vestergaard.weatherapp.Models.CityWeatherData;
+import com.android.vestergaard.weatherapp.R;
 import com.android.vestergaard.weatherapp.Repositories.SharedPreferenceRepository;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+
+import static android.R.attr.name;
 
 public class BoundWeatherService extends Service {
     private final IBinder binder = new WeatherServiceBinder();
@@ -102,6 +119,44 @@ public class BoundWeatherService extends Service {
             protected void onPostExecute(String s) {
                 Intent broadcastIntent = new Intent(DATA_READY_BROADCAST);
                 LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(broadcastIntent);
+
+                // Post Notification
+                final Intent emptyIntent = new Intent();
+                PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, emptyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+                // Heavily inspired by: https://stackoverflow.com/questions/11913358/how-to-get-the-current-time-in-android
+                // Get local time
+                Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT+1:00"));
+                Date currentLocalTime = cal.getTime();
+                DateFormat date = new SimpleDateFormat("HH:mm:ss");
+
+                // you can get seconds by adding  "...:ss" to it
+                date.setTimeZone(TimeZone.getTimeZone("GMT+1:00"));
+
+                String localTime = date.format(currentLocalTime);
+
+                NotificationManager notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+
+                if (Build.VERSION.SDK_INT >= 26)
+                {
+                    Notification.Builder notification = new Notification.Builder(getApplicationContext(), MainActivity.CHANNEL_ID)
+                            .setContentTitle(getText(R.string.AppName))
+                            .setContentText(getText(R.string.NotificationChannelDescription) + ": " + localTime)
+                            .setSmallIcon(R.mipmap.ic_launcher_round)
+                            .setTicker(getText(R.string.NotificationChannelDescription));
+
+                    notificationManager.notify(101, notification.build());
+                } else
+                {
+                    NotificationCompat.Builder notification = new NotificationCompat.Builder(getApplicationContext())
+                            .setChannel(MainActivity.CHANNEL_ID)
+                            .setContentTitle(getText(R.string.AppName))
+                            .setContentText(getText(R.string.NotificationChannelDescription) + ": " + localTime)
+                            .setSmallIcon(R.mipmap.ic_launcher_round)
+                            .setTicker(getText(R.string.NotificationChannelDescription));
+
+                    notificationManager.notify(101, notification.build());
+                }
             }
         };
         asyncTask.execute("yolo");

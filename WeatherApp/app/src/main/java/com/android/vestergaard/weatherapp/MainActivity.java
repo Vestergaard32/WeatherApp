@@ -1,12 +1,18 @@
 package com.android.vestergaard.weatherapp;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.os.Build;
 import android.os.IBinder;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -17,17 +23,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 
-import com.android.vestergaard.weatherapp.Models.CityWeatherAdapter;
+import com.android.vestergaard.weatherapp.Adapters.CityWeatherAdapter;
 import com.android.vestergaard.weatherapp.Models.CityWeatherData;
-import com.android.vestergaard.weatherapp.Models.WeatherData;
-import com.android.vestergaard.weatherapp.Repositories.SharedPreferenceRepository;
 import com.android.vestergaard.weatherapp.Services.BoundWeatherService;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.TimeZone;
 
 public class MainActivity extends AppCompatActivity {
     public boolean mBound;
@@ -36,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
     private final String WEATHER_DATA_INTENT_KEY = "cityWeather";
     private CityWeatherAdapter cityWeatherAdapter;
     ArrayList<CityWeatherData> theCities = new ArrayList();
-
+    public static final String CHANNEL_ID = "weather_app_channel";
 
     private final int CITY_WEATHER_DETAILS_REQUEST_CODE = 0;
 
@@ -44,6 +46,32 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        if (Build.VERSION.SDK_INT >= 26)
+        {
+            NotificationManager mNotificationManager =
+                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+            // The id of the channel.
+            String id = CHANNEL_ID;
+            // The user-visible name of the channel.
+            CharSequence name = getString(R.string.AppName);
+            // The user-visible description of the channel.
+            String description = getString(R.string.NotificationChannelDescription);
+
+            int importance = NotificationManager.IMPORTANCE_HIGH;
+            NotificationChannel mChannel = new NotificationChannel(CHANNEL_ID, name, importance);
+
+            // Configure the notification channel.
+            mChannel.setDescription(description);
+
+            // Sets the notification light color for notifications posted to this
+            // channel, if the device supports this feature.
+            mChannel.enableLights(true);
+            mNotificationManager.createNotificationChannel(mChannel);
+
+        }
+
         Log.d("Weather", "Binding BoundWeatherService...");
         Intent bindIntent = new Intent(this, BoundWeatherService.class);
         startService(bindIntent);

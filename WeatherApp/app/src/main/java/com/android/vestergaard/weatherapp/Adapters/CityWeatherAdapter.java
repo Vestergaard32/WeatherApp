@@ -1,4 +1,4 @@
-package com.android.vestergaard.weatherapp.Models;
+package com.android.vestergaard.weatherapp.Adapters;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -14,13 +14,9 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.vestergaard.weatherapp.Models.CityWeatherData;
 import com.android.vestergaard.weatherapp.R;
 
-import org.w3c.dom.Text;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import java.util.ArrayList;
 
 public class CityWeatherAdapter extends ArrayAdapter<CityWeatherData> {
