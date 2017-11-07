@@ -6,4 +6,6 @@
     <string name="Ok">Ok</string>
     <string name="CityWeatherDescriptionLabel">Weather Description</string>
     <string name="TimeStampLabel">Timestamp: </string>
+    <string name="AddCity">Add</string>
+    <string name="RefreshWeatherData">Refresh</string>
 </resources>

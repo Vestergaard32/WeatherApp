@@ -16,6 +16,8 @@ import com.android.vestergaard.weatherapp.Models.CityWeatherData;
 import com.android.vestergaard.weatherapp.Models.WeatherDescription;
 import com.google.gson.Gson;
 
+import org.w3c.dom.Text;
+
 public class CityWeatherDetailsActivity extends AppCompatActivity {
     public static final int OK_RESULT_CODE = 100;
     public static final int REMOVE_RESULT_CODE = 101;
@@ -60,6 +62,9 @@ public class CityWeatherDetailsActivity extends AppCompatActivity {
 
     private void SetCityWeatherData(CityWeatherData cityWeatherData)
     {
+        TextView txtCountry = (TextView)findViewById(R.id.txtCountry);
+        txtCountry.setText(cityWeatherData.metaWeatherData.Country);
+
         TextView txtViewCityName = (TextView)findViewById(R.id.txtViewCityName);
         txtViewCityName.setText(cityWeatherData.CityName);
 
@@ -99,7 +104,7 @@ public class CityWeatherDetailsActivity extends AppCompatActivity {
 
         if(cityWeatherData.RetrievalDate != null){
             TextView timestamptxt = (TextView) findViewById(R.id.timstamptxt);
-            timestamptxt.setText(getText(R.string.TimeStampLabel)+ " " + cityWeatherData.RetrievalDate);
+            timestamptxt.setText(getString(R.string.TimeStampLabel) + cityWeatherData.RetrievalDate);
         }
     }
 }
