@@ -69,7 +69,6 @@ public class MainActivity extends AppCompatActivity {
             // channel, if the device supports this feature.
             mChannel.enableLights(true);
             mNotificationManager.createNotificationChannel(mChannel);
-
         }
 
         Log.d("Weather", "Binding BoundWeatherService...");

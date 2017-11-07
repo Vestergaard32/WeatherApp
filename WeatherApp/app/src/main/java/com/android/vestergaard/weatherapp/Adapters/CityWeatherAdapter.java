@@ -36,17 +36,17 @@ public class CityWeatherAdapter extends ArrayAdapter<CityWeatherData> {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         // Check if an existing view is being reused, otherwise inflate view
-        ViewHolder holder = null;
+        ViewHolder holder;
         if (convertView == null)
         {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.city_weather_list_item,
                     parent,
                     false);
             holder = new ViewHolder();
-            holder.imageView = (ImageView)convertView.findViewById(R.id.imageView);
-            holder.cityName = (TextView) convertView.findViewById(R.id.CityNameText);
-            holder.cityTemperature = (TextView) convertView.findViewById(R.id.CityTemperature);
-            holder.cityHumidity = (TextView) convertView.findViewById(R.id.CityHumidity);
+            holder.imageView = convertView.findViewById(R.id.imageView);
+            holder.cityName = convertView.findViewById(R.id.CityNameText);
+            holder.cityTemperature = convertView.findViewById(R.id.CityTemperature);
+            holder.cityHumidity = convertView.findViewById(R.id.CityHumidity);
             convertView.setTag(holder);
         }
         else{
@@ -55,13 +55,6 @@ public class CityWeatherAdapter extends ArrayAdapter<CityWeatherData> {
 
         // Get Weather Data for this position in list
         CityWeatherData cityWeatherData = getItem(position);
-
-        // Find views that has to be populated with data
-        /*
-        TextView cityName = (TextView) convertView.findViewById(R.id.CityNameText);
-        TextView cityTemperature = (TextView) convertView.findViewById(R.id.CityTemperature);
-        TextView cityHumidity = (TextView) convertView.findViewById(R.id.CityHumidity);
-        */
 
         // Populate data
         if(holder != null){

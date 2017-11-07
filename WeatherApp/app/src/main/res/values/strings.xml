@@ -5,4 +5,5 @@
     <string name="Remove">Remove</string>
     <string name="Ok">Ok</string>
     <string name="CityWeatherDescriptionLabel">Weather Description</string>
+    <string name="TimeStampLabel">Timestamp: </string>
 </resources>

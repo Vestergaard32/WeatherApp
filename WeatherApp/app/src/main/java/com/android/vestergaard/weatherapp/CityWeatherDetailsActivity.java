@@ -96,5 +96,10 @@ public class CityWeatherDetailsActivity extends AppCompatActivity {
         {
             cityWeatherDescription.setText("");
         }
+
+        if(cityWeatherData.RetrievalDate != null){
+            TextView timestamptxt = (TextView) findViewById(R.id.timstamptxt);
+            timestamptxt.setText(getText(R.string.TimeStampLabel)+ " " + cityWeatherData.RetrievalDate);
+        }
     }
 }

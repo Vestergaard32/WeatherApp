@@ -1,7 +1,6 @@
 package com.android.vestergaard.weatherapp.Services;
 
 import android.app.Notification;
-import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -18,7 +17,6 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Base64;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.android.vestergaard.weatherapp.MainActivity;
 import com.android.vestergaard.weatherapp.Models.Cities;
@@ -43,8 +41,6 @@ import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-import static android.R.attr.name;
-
 public class BoundWeatherService extends Service {
     private final IBinder binder = new WeatherServiceBinder();
     private final String DATA_READY_BROADCAST = "Weather.Data.Ready";
@@ -55,7 +51,7 @@ public class BoundWeatherService extends Service {
     private boolean isStarted = false;
 
     /* Methods For The Components */
-    public void getCurrentWeather(final String city){
+    private void getCurrentWeather(final String city){
         Log.d("Weather", "Getting current weather data");
         Call<CityWeatherData> bla = weatherApiService.getCityWeatherData(city);
         try
