@@ -41,29 +41,29 @@
 
     <TextView
         android:id="@+id/CityWeatherTemperature"
-        android:layout_width="wrap_content"
+        android:layout_width="100dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
+        android:layout_marginTop="20dp"
         android:text="TextView"
-        android:textSize="16sp"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginTop="268dp"
-        tools:layout_constraintRight_creator="1"
-        app:layout_constraintRight_toRightOf="parent"
-        android:layout_marginRight="16dp" />
+        android:textAlignment="center"
+        android:textSize="24sp"
+        app:layout_constraintLeft_toRightOf="@+id/txtCountry"
+        app:layout_constraintTop_toBottomOf="@+id/txtCountry"
+        tools:layout_constraintLeft_creator="1"
+        tools:layout_constraintTop_creator="1" />
 
     <TextView
         android:id="@+id/CityWeatherHumidity"
-        android:layout_width="wrap_content"
+        android:layout_width="100dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
         android:text="TextView"
-        android:textSize="16sp"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginTop="268dp"
-        android:layout_marginStart="46dp"
-        tools:layout_constraintLeft_creator="1"
-        app:layout_constraintLeft_toLeftOf="parent"
-        android:layout_marginLeft="46dp" />
+        android:textAlignment="center"
+        android:textSize="24sp"
+        app:layout_constraintRight_toLeftOf="@+id/txtCountry"
+        app:layout_constraintTop_toBottomOf="@+id/txtCountry"
+        tools:layout_constraintRight_creator="1"
+        tools:layout_constraintTop_creator="1" />
 
     <TextView
         android:id="@+id/CityWeatherDescriptionLabel"
@@ -72,20 +72,13 @@
         android:text="@string/CityWeatherDescriptionLabel"
         android:textSize="18sp"
         android:textStyle="bold"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
         tools:layout_constraintTop_creator="1"
         tools:layout_constraintRight_creator="1"
-        tools:layout_constraintBottom_creator="1"
-        app:layout_constraintBottom_toTopOf="@+id/timstamptxt"
-        android:layout_marginStart="46dp"
-        android:layout_marginEnd="45dp"
-        app:layout_constraintRight_toRightOf="@+id/imgViewWeatherIcon"
-        android:layout_marginTop="62dp"
-        tools:layout_constraintLeft_creator="1"
-        android:layout_marginBottom="58dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/CityWeatherHumidity"
-        android:layout_marginLeft="46dp"
-        android:layout_marginRight="45dp" />
+        android:layout_marginTop="26dp"
+        app:layout_constraintTop_toBottomOf="@+id/CityWeatherHumidity"
+        tools:layout_constraintLeft_creator="1" />
 
     <TextView
         android:id="@+id/CityWeatherDescription"
@@ -94,8 +87,10 @@
         android:text="TextView"
         tools:layout_constraintTop_creator="1"
         app:layout_constraintTop_toBottomOf="@+id/CityWeatherDescriptionLabel"
-        tools:layout_constraintLeft_creator="1"
-        app:layout_constraintLeft_toLeftOf="@+id/CityWeatherDescriptionLabel" />
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        tools:layout_constraintRight_creator="1"
+        tools:layout_constraintLeft_creator="1" />
 
     <Button
         android:id="@+id/btnRemove"
