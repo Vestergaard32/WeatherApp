@@ -9,6 +9,4 @@ public class WeatherDescription {
     public String Description;
     @SerializedName("icon")
     public String Icon;
-    @SerializedName("main")
-    public String Keyword;
 }

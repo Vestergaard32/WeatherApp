@@ -149,6 +149,8 @@ public class BoundWeatherService extends Service {
 
                 NotificationManager notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
 
+                // Here we post a notification based on API level
+                // Originally we wanted to only use NotificationCompat.Builder for all cases, but could not get it to work.
                 if (Build.VERSION.SDK_INT >= 26)
                 {
                     Notification.Builder notification = new Notification.Builder(getApplicationContext(), MainActivity.CHANNEL_ID)
@@ -182,6 +184,7 @@ public class BoundWeatherService extends Service {
             return BoundWeatherService.this;
         }
     }
+
     @Override
     public IBinder onBind(Intent intent) {
         Log.d("Weather", "BoundWeatherService OnBind Called!");
@@ -192,6 +195,9 @@ public class BoundWeatherService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        // We build a concrete implementation of our Open Weather Map API interface
+        // This Weather API Service can then be used to call the API for weather data
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("http://api.openweathermap.org/data/2.5/")
                 .addConverterFactory(GsonConverterFactory.create())
@@ -199,6 +205,8 @@ public class BoundWeatherService extends Service {
 
         Timer = new Timer();
         weatherApiService = retrofit.create(OpenWeatherApiService.class);
+
+        // Create shared prefs repository
         repository = new SharedPreferenceRepository(getApplicationContext());
     }
 
@@ -206,6 +214,8 @@ public class BoundWeatherService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         if(!isStarted){
         /* Heavily influence by https://stackoverflow.com/questions/6531950/how-to-execute-async-task-repeatedly-after-fixed-time-intervals*/
+        // We essentially start a timed task which will force a refresh at specified intervals, in order to get weather data to update every
+            // 5 minutes
             TimerTask doAsynchronousTask = new TimerTask() {
                 @Override
                 public void run() {
@@ -220,6 +230,8 @@ public class BoundWeatherService extends Service {
                     });
                 }
             };
+
+            // Schedule/Start the timed task of updating weather data every 5 minutes
             Timer.schedule(doAsynchronousTask, 0, 5*60*1000); // Every 5 minutes
         }
 

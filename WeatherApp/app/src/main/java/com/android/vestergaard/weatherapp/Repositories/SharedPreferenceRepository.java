@@ -9,6 +9,9 @@ import com.google.gson.Gson;
 
 import java.util.ArrayList;
 
+/*
+    Repository pattern used for app code to save city weather data to shared prefs
+ */
 public class SharedPreferenceRepository {
     private Context applicationContext;
     private final String CITY_WEATHER_DATA_KEY = "CityWeatherData";
@@ -36,21 +39,6 @@ public class SharedPreferenceRepository {
         String json = sharedPref.getString(cityName, "");
 
         return gson.fromJson(json, CityWeatherData.class);
-    }
-
-    public void RemoveCityWeatherData(String cityName)
-    {
-        SharedPreferences sharedPref = applicationContext.getSharedPreferences(CITY_WEATHER_DATA_KEY, Context.MODE_PRIVATE);
-        SharedPreferences.Editor sharedPrefEditor = sharedPref.edit();
-        Gson gson = new Gson();
-
-        sharedPrefEditor.remove(cityName);
-        sharedPrefEditor.commit();
-    }
-
-    public ArrayList<CityWeatherData> GetAllCities()
-    {
-        return null;
     }
 
     public void SaveCity(String city){

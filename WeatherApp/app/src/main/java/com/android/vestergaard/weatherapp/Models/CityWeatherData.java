@@ -8,9 +8,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 public class CityWeatherData {
-    @SerializedName("id")
-    public long CityId;
-
     @SerializedName("name")
     public String CityName;
 

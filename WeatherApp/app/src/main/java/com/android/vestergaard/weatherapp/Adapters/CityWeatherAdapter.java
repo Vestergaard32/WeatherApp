@@ -25,7 +25,7 @@ public class CityWeatherAdapter extends ArrayAdapter<CityWeatherData> {
     }
 
     /*private view holder class
-    * http://theopentutorials.com/tutorials/android/listview/android-custom-listview-with-image-and-text-using-arrayadapter/*/
+    * Heavily inspired by http://theopentutorials.com/tutorials/android/listview/android-custom-listview-with-image-and-text-using-arrayadapter/*/
     private class ViewHolder {
         ImageView imageView;
         TextView cityName;
