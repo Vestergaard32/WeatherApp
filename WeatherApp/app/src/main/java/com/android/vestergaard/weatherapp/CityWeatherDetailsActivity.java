@@ -16,8 +16,6 @@ import com.android.vestergaard.weatherapp.Models.CityWeatherData;
 import com.android.vestergaard.weatherapp.Models.WeatherDescription;
 import com.google.gson.Gson;
 
-import org.w3c.dom.Text;
-
 public class CityWeatherDetailsActivity extends AppCompatActivity {
     public static final int OK_RESULT_CODE = 100;
     public static final int REMOVE_RESULT_CODE = 101;
@@ -31,6 +29,7 @@ public class CityWeatherDetailsActivity extends AppCompatActivity {
         // Get city weather data intent
         cityWeatherDetailsIntent = getIntent();
 
+        // Deserialize city weather data and update UI labels with it
         Gson gson = new Gson();
         CityWeatherData cityWeatherData = (CityWeatherData)gson.fromJson(cityWeatherDetailsIntent.getStringExtra("cityWeather"), CityWeatherData.class);
         Log.d("Weather", "Timestamp: " + cityWeatherData.RetrievalDate);
@@ -41,6 +40,7 @@ public class CityWeatherDetailsActivity extends AppCompatActivity {
 
     private void SetupEventListeners()
     {
+        // Set up on click event listener for Ok button
         Button btnOk = (Button)findViewById(R.id.btnOk);
         btnOk.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -50,6 +50,7 @@ public class CityWeatherDetailsActivity extends AppCompatActivity {
             }
         });
 
+        // Set up on click event listener for Remove button
         Button btnRemove = (Button)findViewById(R.id.btnRemove);
         btnRemove.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -60,6 +61,7 @@ public class CityWeatherDetailsActivity extends AppCompatActivity {
         });
     }
 
+    // Set all UI labels with city weather data selected from previous activity
     private void SetCityWeatherData(CityWeatherData cityWeatherData)
     {
         TextView txtCountry = (TextView)findViewById(R.id.txtCountry);

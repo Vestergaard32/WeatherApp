@@ -53,12 +53,21 @@ public class BoundWeatherService extends Service {
     /* Methods For The Components */
     private void getCurrentWeather(final String city){
         Log.d("Weather", "Getting current weather data");
-        Call<CityWeatherData> bla = weatherApiService.getCityWeatherData(city);
+        Call<CityWeatherData> cityWeatherDataApiCall = weatherApiService.getCityWeatherData(city);
         try
         {
-            CityWeatherData data = bla.execute().body();
+            // Call weather API synchroniously and get the returned HTTP body
+            CityWeatherData data = cityWeatherDataApiCall.execute().body();
+
+            // We override the city name returned from the API with what the user
+            // Actually entered instead for the model, so that the model is consistent
+            // With the user input
             data.CityName = city;
+
             try {
+                // If an icon was retrieved from the API call, we decode it and encode
+                // It as a Base64 string which is saved in SharedPrefs with the rest of the city
+                // Data
                 if(data.WeatherDescription.get(0).Icon != null){
                     String icon = data.WeatherDescription.get(0).Icon;
                     String imageUrl = "http://openweathermap.org/img/w/" + icon + ".png";
@@ -72,6 +81,8 @@ public class BoundWeatherService extends Service {
                 Log.d("Weather", "IOException from getting ICON");
                 e.printStackTrace();
             }
+
+            // Save city weather data to shared prefs
             repository.SaveCityWeatherData(city, data);
         } catch (Exception e)
         {
@@ -80,6 +91,7 @@ public class BoundWeatherService extends Service {
         }
     }
 
+    // Get a list of weather data for all the user's cities
     public ArrayList<CityWeatherData> getAllCitiesWeather(){
         Cities cities = repository.GetCities();
         ArrayList<CityWeatherData> data = new ArrayList<>();
@@ -90,16 +102,20 @@ public class BoundWeatherService extends Service {
         return data;
     }
 
+    // Add a city to the list of user's cities
     public void AddCity(String cityName){
         repository.SaveCity(cityName);
         ForceRefresh();
     }
 
+    // Remove a city from the list of user's cities
     public void RemoveCity(String cityName){
         repository.RemoveCity(cityName);
         ForceRefresh();
     }
 
+    // Force refresh will start an asynchronous task which will update weather data for all
+    // Cities which the user have entered
     public void ForceRefresh(){
         AsyncTask<String, String, String> asyncTask = new AsyncTask<String, String, String>() {
             @Override
@@ -113,6 +129,8 @@ public class BoundWeatherService extends Service {
 
             @Override
             protected void onPostExecute(String s) {
+                // After weather data update is done, we send a local broadcast so that other activities
+                // Can react to it
                 Intent broadcastIntent = new Intent(DATA_READY_BROADCAST);
                 LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(broadcastIntent);
 
@@ -120,13 +138,11 @@ public class BoundWeatherService extends Service {
                 final Intent emptyIntent = new Intent();
                 PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, emptyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-                // Heavily inspired by: https://stackoverflow.com/questions/11913358/how-to-get-the-current-time-in-android
                 // Get local time
+                // This is heavily inspired by: https://stackoverflow.com/questions/11913358/how-to-get-the-current-time-in-android
                 Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT+1:00"));
                 Date currentLocalTime = cal.getTime();
                 DateFormat date = new SimpleDateFormat("HH:mm:ss");
-
-                // you can get seconds by adding  "...:ss" to it
                 date.setTimeZone(TimeZone.getTimeZone("GMT+1:00"));
 
                 String localTime = date.format(currentLocalTime);
@@ -155,6 +171,8 @@ public class BoundWeatherService extends Service {
                 }
             }
         };
+
+        // Start to run the previously defined asynchronous task
         asyncTask.execute("yolo");
     }
 

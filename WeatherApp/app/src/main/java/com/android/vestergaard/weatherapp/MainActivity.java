@@ -1,9 +1,7 @@
 package com.android.vestergaard.weatherapp;
 
-import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -12,7 +10,6 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Build;
 import android.os.IBinder;
-import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -29,7 +26,6 @@ import com.android.vestergaard.weatherapp.Services.BoundWeatherService;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
-import java.util.TimeZone;
 
 public class MainActivity extends AppCompatActivity {
     public boolean mBound;
@@ -47,29 +43,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if (Build.VERSION.SDK_INT >= 26)
-        {
-            NotificationManager mNotificationManager =
-                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-            // The id of the channel.
-            String id = CHANNEL_ID;
-            // The user-visible name of the channel.
-            CharSequence name = getString(R.string.AppName);
-            // The user-visible description of the channel.
-            String description = getString(R.string.NotificationChannelDescription);
-
-            int importance = NotificationManager.IMPORTANCE_HIGH;
-            NotificationChannel mChannel = new NotificationChannel(CHANNEL_ID, name, importance);
-
-            // Configure the notification channel.
-            mChannel.setDescription(description);
-
-            // Sets the notification light color for notifications posted to this
-            // channel, if the device supports this feature.
-            mChannel.enableLights(true);
-            mNotificationManager.createNotificationChannel(mChannel);
-        }
+        CreateNotificationChannel();
 
         Log.d("Weather", "Binding BoundWeatherService...");
         Intent bindIntent = new Intent(this, BoundWeatherService.class);
@@ -81,8 +55,41 @@ public class MainActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).registerReceiver(dataReceiver, new IntentFilter(DATA_READY_NOTIFICATION));
     }
 
+    private void CreateNotificationChannel()
+    {
+        /*
+        This notification channel setup is heavily inspired from the Android Studio documentation
+        on notifications found here: https://developer.android.com/guide/topics/ui/notifiers/notifications.html
+
+        We only create a notification channel API version 26 or above
+         */
+        if (Build.VERSION.SDK_INT >= 26)
+        {
+            NotificationManager mNotificationManager =
+                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+            // The channel ID
+            String id = CHANNEL_ID;
+
+            // The user-visible name of the channel.
+            CharSequence name = getString(R.string.AppName);
+
+            // The user-visible description of the channel.
+            String description = getString(R.string.NotificationChannelDescription);
+
+            int importance = NotificationManager.IMPORTANCE_HIGH;
+            NotificationChannel mChannel = new NotificationChannel(CHANNEL_ID, name, importance);
+
+            // Configure the notification channel.
+            mChannel.setDescription(description);
+
+            mNotificationManager.createNotificationChannel(mChannel);
+        }
+    }
+
     private void SetupEventListeners()
     {
+        // Set up on item click event listener for the list view
         ListView cityWeatherDataListView = (ListView) findViewById(R.id.cityWeatherDataList);
         cityWeatherDataListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -97,6 +104,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // Set up click event listener for refresh weather data button
         Button btnRefresh = (Button)findViewById(R.id.btnRefresh);
         btnRefresh.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -108,6 +116,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // Set up click event listener for add city button
         Button btnAdd = (Button) findViewById(R.id.btnAddCity);
         final EditText txtCityName = (EditText) findViewById(R.id.cityNameInput);
         btnAdd.setOnClickListener(new View.OnClickListener() {
@@ -139,6 +148,7 @@ public class MainActivity extends AppCompatActivity {
     {
         if (requestCode == CITY_WEATHER_DETAILS_REQUEST_CODE)
         {
+            // Remove city from list view if this is the result code from CityWeatherDetailsActivity
             if (resultCode == CityWeatherDetailsActivity.REMOVE_RESULT_CODE)
             {
                 Gson gson = new Gson();
@@ -182,6 +192,8 @@ public class MainActivity extends AppCompatActivity {
             BoundWeatherService.WeatherServiceBinder binder = (BoundWeatherService.WeatherServiceBinder) service;
             mService = binder.getService();
             mBound = true;
+
+            // Populate city list view by creating a new adapter with fetched cities
             theCities = mService.getAllCitiesWeather();
             cityWeatherAdapter = new CityWeatherAdapter(getApplicationContext(), R.layout.city_weather_list_item,
                     theCities);
