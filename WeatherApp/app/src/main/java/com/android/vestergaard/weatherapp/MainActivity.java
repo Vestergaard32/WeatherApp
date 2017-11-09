@@ -5,12 +5,14 @@ import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Build;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -52,7 +54,11 @@ public class MainActivity extends AppCompatActivity {
 
         SetupEventListeners();
 
-        LocalBroadcastManager.getInstance(this).registerReceiver(dataReceiver, new IntentFilter(DATA_READY_NOTIFICATION));
+        IntentFilter broadcastFilter = new IntentFilter();
+        broadcastFilter.addAction(BoundWeatherService.DATA_READY_BROADCAST);
+        broadcastFilter.addAction(BoundWeatherService.CITY_NOT_FOUND_BROADCAST);
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(dataReceiver, broadcastFilter);
     }
 
     private void CreateNotificationChannel()
@@ -133,13 +139,36 @@ public class MainActivity extends AppCompatActivity {
     private BroadcastReceiver dataReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            theCities = mService.getAllCitiesWeather();
 
-            cityWeatherAdapter = new CityWeatherAdapter(getApplicationContext(), R.layout.city_weather_list_item,
-                    theCities);
+            Log.d("Weather", "Broadcast action was: " + intent.getAction());
 
-            ListView cityWeatherDataListView = (ListView) findViewById(R.id.cityWeatherDataList);
-            cityWeatherDataListView.setAdapter(cityWeatherAdapter);
+            if (intent.getAction() == BoundWeatherService.DATA_READY_BROADCAST)
+            {
+                theCities = mService.getAllCitiesWeather();
+
+                cityWeatherAdapter = new CityWeatherAdapter(getApplicationContext(), R.layout.city_weather_list_item,
+                        theCities);
+
+                ListView cityWeatherDataListView = (ListView) findViewById(R.id.cityWeatherDataList);
+                cityWeatherDataListView.setAdapter(cityWeatherAdapter);
+            } else if (intent.getAction() == BoundWeatherService.CITY_NOT_FOUND_BROADCAST)
+            {
+                String cityName = intent.getStringExtra("CityName");
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this)
+                                                .setCancelable(false)
+                                                .setTitle(getString(R.string.CityNotFoundTitle, cityName))
+                                                .setMessage(getString(R.string.CityNotFoundMessage, cityName))
+                                                .setPositiveButton(getString(R.string.Ok), new DialogInterface.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                                                    }
+                                                });
+
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            }
         }
     };
 

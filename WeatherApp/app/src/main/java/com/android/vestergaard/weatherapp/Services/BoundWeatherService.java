@@ -43,7 +43,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class BoundWeatherService extends Service {
     private final IBinder binder = new WeatherServiceBinder();
-    private final String DATA_READY_BROADCAST = "Weather.Data.Ready";
+    public static final String DATA_READY_BROADCAST = "Weather.Data.Ready";
+    public static final String CITY_NOT_FOUND_BROADCAST = "City.Not.Found";
     private OpenWeatherApiService weatherApiService;
     private SharedPreferenceRepository repository;
     private final Handler handler = new Handler();;
@@ -58,6 +59,21 @@ public class BoundWeatherService extends Service {
         {
             // Call weather API synchroniously and get the returned HTTP body
             CityWeatherData data = cityWeatherDataApiCall.execute().body();
+
+            if (data == null)
+            {
+                Log.d("Weather", "City was not found!");
+                repository.RemoveCity(city);
+
+                Intent cityNotFoundBroadcast = new Intent("City.Not.Found");
+                cityNotFoundBroadcast.putExtra("CityName", city);
+
+                Log.d("Weather", "Broadcast removed city event!");
+                Log.d("Weather", "And theaction was: " + cityNotFoundBroadcast.getAction());
+                LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(cityNotFoundBroadcast);
+
+                return;
+            }
 
             // We override the city name returned from the API with what the user
             // Actually entered instead for the model, so that the model is consistent

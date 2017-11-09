@@ -1,11 +1,13 @@
 <resources>
     <string name="AppName">Weather App 18</string>
     <string name="NotificationChannelDescription">Last Checked Weather At:</string>
-    <string name="app_name">WeatherApp</string>
+    <string name="app_name">Weather App 18</string>
     <string name="Remove">Remove</string>
     <string name="Ok">Ok</string>
     <string name="CityWeatherDescriptionLabel">Weather Description</string>
     <string name="TimeStampLabel">Timestamp: </string>
     <string name="AddCity">Add</string>
     <string name="RefreshWeatherData">Refresh</string>
+    <string name="CityNotFoundTitle">City %s Not Found</string>
+    <string name="CityNotFoundMessage">The city %s does not exist in the API and will be removed</string>
 </resources>

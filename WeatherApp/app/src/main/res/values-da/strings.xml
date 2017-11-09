@@ -1,11 +1,13 @@
 <resources>
     <string name="AppName">Vejr App 18</string>
     <string name="NotificationChannelDescription">Vejr Data Blev Hentet:</string>
-    <string name="app_name">Vejr App</string>
+    <string name="app_name">Vejr App 18</string>
     <string name="Remove">Fjern By</string>
     <string name="Ok">Ok</string>
     <string name="CityWeatherDescriptionLabel">Vejr Beskrivelse</string>
     <string name="TimeStampLabel">Tidsstempel:</string>
     <string name="AddCity">Tilføj</string>
     <string name="RefreshWeatherData">Opdater</string>
+    <string name="CityNotFoundTitle">Byen %s Blev Ikke Fundet</string>
+    <string name="CityNotFoundMessage">Byen %s kunne ikke findes og vil blive fjernet</string>
 </resources>
