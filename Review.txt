@@ -1,0 +1,2 @@
+Need to listen for service input in the details activity
+Should check permission every time when using interwebz
