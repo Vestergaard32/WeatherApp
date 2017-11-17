@@ -1,6 +1,8 @@
 package com.android.vestergaard.weatherapp.Services;
 
+import android.annotation.SuppressLint;
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -45,6 +47,8 @@ public class BoundWeatherService extends Service {
     private final IBinder binder = new WeatherServiceBinder();
     public static final String DATA_READY_BROADCAST = "Weather.Data.Ready";
     public static final String CITY_NOT_FOUND_BROADCAST = "City.Not.Found";
+    public static final String NOTIFICATION_CHANNEL_ID = "MY_NOTIFICATION_CHANNEL";
+    public static final String NOTIFICATION_CHANNEL_NAME = "My visible notification channel";
     private OpenWeatherApiService weatherApiService;
     private SharedPreferenceRepository repository;
     private final Handler handler = new Handler();;
@@ -118,6 +122,11 @@ public class BoundWeatherService extends Service {
         return data;
     }
 
+    // Get the weather data for a single city
+    public CityWeatherData GetWeatherDataForCity(String cityName){
+        return repository.GetCityWeatherData(cityName);
+    }
+
     // Add a city to the list of user's cities
     public void AddCity(String cityName){
         repository.SaveCity(cityName);
@@ -133,7 +142,7 @@ public class BoundWeatherService extends Service {
     // Force refresh will start an asynchronous task which will update weather data for all
     // Cities which the user have entered
     public void ForceRefresh(){
-        AsyncTask<String, String, String> asyncTask = new AsyncTask<String, String, String>() {
+        @SuppressLint("StaticFieldLeak") AsyncTask<String, String, String> asyncTask = new AsyncTask<String, String, String>() {
             @Override
             protected String doInBackground(String[] strings) {
                 Cities cities = repository.GetCities();
@@ -150,10 +159,6 @@ public class BoundWeatherService extends Service {
                 Intent broadcastIntent = new Intent(DATA_READY_BROADCAST);
                 LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(broadcastIntent);
 
-                // Post Notification
-                final Intent emptyIntent = new Intent();
-                PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, emptyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
                 // Get local time
                 // This is heavily inspired by: https://stackoverflow.com/questions/11913358/how-to-get-the-current-time-in-android
                 Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT+1:00"));
@@ -165,33 +170,28 @@ public class BoundWeatherService extends Service {
 
                 NotificationManager notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
 
-                // Here we post a notification based on API level
-                // Originally we wanted to only use NotificationCompat.Builder for all cases, but could not get it to work.
-                if (Build.VERSION.SDK_INT >= 26)
+                // Inspired by Leafcastle code example (Services Demo)
+                // Check for build version - If Oreo, create a notification channel
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                 {
-                    Notification.Builder notification = new Notification.Builder(getApplicationContext(), MainActivity.CHANNEL_ID)
-                            .setContentTitle(getText(R.string.AppName))
-                            .setContentText(getText(R.string.NotificationChannelDescription) + ": " + localTime)
-                            .setSmallIcon(R.mipmap.ic_launcher_round)
-                            .setTicker(getText(R.string.NotificationChannelDescription));
-
-                    notificationManager.notify(101, notification.build());
-                } else
-                {
-                    NotificationCompat.Builder notification = new NotificationCompat.Builder(getApplicationContext())
-                            .setChannel(MainActivity.CHANNEL_ID)
-                            .setContentTitle(getText(R.string.AppName))
-                            .setContentText(getText(R.string.NotificationChannelDescription) + ": " + localTime)
-                            .setSmallIcon(R.mipmap.ic_launcher_round)
-                            .setTicker(getText(R.string.NotificationChannelDescription));
-
-                    notificationManager.notify(101, notification.build());
+                    NotificationChannel mChannel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, NOTIFICATION_CHANNEL_NAME, NotificationManager.IMPORTANCE_LOW);
+                    NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                    mNotificationManager.createNotificationChannel(mChannel);
                 }
+                    Notification notification =
+                        new NotificationCompat.Builder(getApplicationContext(), NOTIFICATION_CHANNEL_ID)
+                            .setContentTitle(getText(R.string.AppName))
+                            .setContentText(getText(R.string.NotificationChannelDescription) + ": " + localTime)
+                            .setSmallIcon(R.mipmap.ic_launcher_round)
+                            .setTicker(getText(R.string.NotificationChannelDescription))
+                            .build();
+
+                    notificationManager.notify(101, notification);
             }
         };
 
         // Start to run the previously defined asynchronous task
-        asyncTask.execute("yolo");
+        asyncTask.execute("");
     }
 
     /* Binder Method */
@@ -231,7 +231,8 @@ public class BoundWeatherService extends Service {
         if(!isStarted){
         /* Heavily influence by https://stackoverflow.com/questions/6531950/how-to-execute-async-task-repeatedly-after-fixed-time-intervals*/
         // We essentially start a timed task which will force a refresh at specified intervals, in order to get weather data to update every
-            // 5 minutes
+        // 5 minutes
+        isStarted = true;
             TimerTask doAsynchronousTask = new TimerTask() {
                 @Override
                 public void run() {
@@ -250,13 +251,13 @@ public class BoundWeatherService extends Service {
             // Schedule/Start the timed task of updating weather data every 5 minutes
             Timer.schedule(doAsynchronousTask, 0, 5*60*1000); // Every 5 minutes
         }
-
         return START_STICKY;
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
+        isStarted = false;
         Timer.cancel();
         Timer.purge();
     }
