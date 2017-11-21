@@ -133,23 +133,6 @@ public class MainActivity extends AppCompatActivity {
     };
 
     @Override
-    protected  void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == CITY_WEATHER_DETAILS_REQUEST_CODE)
-        {
-            // Remove city from list view if this is the result code from CityWeatherDetailsActivity
-            if (resultCode == CityWeatherDetailsActivity.REMOVE_RESULT_CODE)
-            {
-                Gson gson = new Gson();
-                CityWeatherData cityData = gson.fromJson(data.getStringExtra(WEATHER_DATA_INTENT_KEY), CityWeatherData.class);
-                Log.d("Weather", "User wanted to remove city " + cityData.CityName);
-                if(mBound){
-                    mService.RemoveCity(cityData.CityName);
-                }
-            }
-        }
-    }
-
-    @Override
     protected void onDestroy() {
         super.onDestroy();
         if (mBound) {
@@ -160,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(dataReceiver);
     }
 
-    /* Defines callbacks for service binding, passed to bindService() */
+    /** Defines callbacks for service binding, passed to bindService() */
     private ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName className, IBinder service) {

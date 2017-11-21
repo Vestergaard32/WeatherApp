@@ -211,7 +211,6 @@ public class BoundWeatherService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-
         // We build a concrete implementation of our Open Weather Map API interface
         // This Weather API Service can then be used to call the API for weather data
         Retrofit retrofit = new Retrofit.Builder()
