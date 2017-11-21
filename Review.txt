@@ -1,2 +1,5 @@
 Need to listen for service input in the details activity
 Should check permission every time when using interwebz
+
+go into detail view and rotate screen to landscape and deletes the city, then the city is not deleted from the list 
+view. 

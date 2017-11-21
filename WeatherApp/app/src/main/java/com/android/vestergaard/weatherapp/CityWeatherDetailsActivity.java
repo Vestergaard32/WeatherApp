@@ -89,7 +89,7 @@ public class CityWeatherDetailsActivity extends AppCompatActivity {
         btnRemove.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                setResult(REMOVE_RESULT_CODE, getIntent());
+                setResult(REMOVE_RESULT_CODE, cityWeatherDetailsIntent);
                 finish();
             }
         });
